@@ -12,11 +12,6 @@
 
 #define MULTIRESETDETECTOR_DEBUG        false  //false
 
-#include <ConfigAssist.h>
-#include <ConfigAssistHelper.h>
-
-#include <ESPTelnet.h>
-
 #include <ESP_MultiResetDetector.h>
 
 #include <Wire.h>
