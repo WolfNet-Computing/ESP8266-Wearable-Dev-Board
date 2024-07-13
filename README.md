@@ -1,5 +1,5 @@
 # ESP8266 Wearable Dev Board
- ESP8266 Wearable Development Board as a software replacement for the DSTIKE Deauther.  
+ A customisable ESP8266 Wearable Development Board software as a replacement for the stock DSTIKE Deauther firmware.  
  
 > [!CAUTION]
 > This software is in the development phase. Do not expect it to work yet.  
