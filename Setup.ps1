@@ -51,15 +51,15 @@ Else
 		{
 			Remove-Item "${env:LOCALAPPDATA}\Microsoft\WindowsApps\python3.exe"
 		}
-		$ARDUINO_LIBS = "C:\Users\${env:USERNAME}\Documents\Arduino\"
+		$ARDUINO_LIBS = "C:\Users\${env:USERNAME}\Documents\Arduino\libraries\"
 	}
 	ElseIf ($IsLinux -Or $IsMacOS) {
 		$PYTHON_EXE = "python3"
 		If ($IsLinux) {
-			$ARDUINO_LIBS = "/home/${env:USER}/Arduino/"
+			$ARDUINO_LIBS = "/home/${env:USER}/Arduino/libraries/"
 		}
 		Else {
-			$ARDUINO_LIBS = "/Users/${env:USER}/Documents/Arduino/"
+			$ARDUINO_LIBS = "/Users/${env:USER}/Documents/Arduino/libraries/"
 		}
 	}
 	Else {
