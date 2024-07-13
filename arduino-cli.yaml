@@ -1,0 +1,5 @@
+# arduino-cli.yaml
+board_manager:
+  additional_urls:
+    - https://raw.githubusercontent.com/SpacehuhnTech/arduino/main/package_spacehuhn_index.json
+    - https://arduino.esp8266.com/stable/package_esp8266com_index.json
