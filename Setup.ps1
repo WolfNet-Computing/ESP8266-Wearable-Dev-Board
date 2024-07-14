@@ -38,7 +38,7 @@ Else
 	# Setting $PYTHON_EXE within these if statements allows for OS specific differences in the naming of the Python3 executable.
 	# The Else statement allows the script to detect an unsupported OS and take appropriate actions.
 	If ($IsWindows) {
-		$PYTHON_EXE = "py"
+		$PYTHON_EXE = "python"
 		If (Test-Path -Path "${env:LOCALAPPDATA}\Microsoft\WindowsApps\py.exe")
 		{
 			Remove-Item "${env:LOCALAPPDATA}\Microsoft\WindowsApps\py.exe"
@@ -94,7 +94,7 @@ Else
 	Write-Host "Installing esptool..."
 	& $PYTHON_EXE '-m' 'pip' 'install' '--upgrade' 'esptool' | Out-Null
 
-	$downloads = @("https://github.com/khoih-prog/ESP_MultiResetDetector/archive/refs/heads/main.zip","https://github.com/pangodream/ESP2SOTA/archive/refs/heads/main.zip","https://github.com/gadaman-rm/ESP_MultiWiFi/archive/refs/heads/main.zip","https://github.com/LennartHennigs/ESPTelnet/archive/refs/heads/main.zip","https://github.com/Tost69/ConfigStorage/archive/refs/heads/main.zip","https://github.com/bblanchon/ArduinoJson/archive/refs/heads/7.x.zip","https://github.com/yurilopes/SPIFFSIniFile/archive/refs/heads/master.zip","https://github.com/radekrudak/BetterOTA/archive/refs/heads/master.zip","https://github.com/usini/usini_discord_webhook/archive/refs/heads/main.zip","https://github.com/ofekp/TinyUPnP/archive/refs/heads/master.zip","https://github.com/gemi254/ConfigAssist-ESP32-ESP8266/archive/refs/heads/main.zip","https://github.com/ThingPulse/esp8266-oled-ssd1306/archive/refs/heads/master.zip","https://github.com/vshymanskyy/Preferences/archive/refs/heads/main.zip","https://github.com/tobozo/YAMLDuino/archive/refs/heads/main.zip")
+	$downloads = @("https://github.com/khoih-prog/ESP_MultiResetDetector/archive/refs/heads/main.zip","https://github.com/pangodream/ESP2SOTA/archive/refs/heads/main.zip","https://github.com/gadaman-rm/ESP_MultiWiFi/archive/refs/heads/main.zip","https://github.com/LennartHennigs/ESPTelnet/archive/refs/heads/main.zip","https://github.com/Tost69/ConfigStorage/archive/refs/heads/main.zip","https://github.com/bblanchon/ArduinoJson/archive/refs/heads/7.x.zip","https://github.com/yurilopes/SPIFFSIniFile/archive/refs/heads/master.zip","https://github.com/radekrudak/BetterOTA/archive/refs/heads/master.zip","https://github.com/usini/usini_discord_webhook/archive/refs/heads/main.zip","https://github.com/ofekp/TinyUPnP/archive/refs/heads/master.zip","https://github.com/gemi254/ConfigAssist-ESP32-ESP8266/archive/refs/heads/main.zip","https://github.com/ThingPulse/esp8266-oled-ssd1306/archive/refs/heads/master.zip","https://github.com/vshymanskyy/Preferences/archive/refs/heads/main.zip","https://github.com/tobozo/YAMLDuino/archive/refs/heads/main.zip","https://github.com/khoih-prog/ESP_WiFiManager/archive/refs/heads/master.zip","https://github.com/FastLED/FastLED/archive/refs/heads/master.zip")
 	foreach ($download in $downloads) {
 		Write-Host "Downloading and extracting file: ${download}"
 		Invoke-WebRequest -Uri $download -OutFile ".\download.zip"
