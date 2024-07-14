@@ -1,59 +1,50 @@
 // These defines must be put before #include <ESP_MultiResetDetector.h>
 // to select where to store MultiResetDetector's variable.
-// For ESP32, You must select one to be true (EEPROM or SPIFFS)
-// For ESP8266, You must select one to be true (RTC, EEPROM, LITTLEFS or SPIFFS)
-// Otherwise, library will use default EEPROM storage
+// For ESP32, You must select one to be true. (EEPROM or SPIFFS)
+// For ESP8266, You must select one to be true. (RTC, EEPROM, LITTLEFS or SPIFFS)
+// Otherwise, library will use default EEPROM storage.
 
-#define ESP8266_MRD_USE_RTC             false   //true
+// https://arduino-esp8266.readthedocs.io/en/latest/ for more on esp8266 programming using the Arduino IDE.
+
+#include "config.h"
+#include "display.h"
+#include "torch.h"
+#include "startup_logo.h"
+
+#define ESP8266_MRD_USE_RTC             false
 
 #define ESP_MRD_USE_LITTLEFS            true
 #define ESP_MRD_USE_SPIFFS              false
 #define ESP_MRD_USE_EEPROM              false
 
-#define MULTIRESETDETECTOR_DEBUG        false  //false
+#define MULTIRESETDETECTOR_DEBUG        false
 
 #include <ESP_MultiResetDetector.h>
-
-#include <Wire.h>
-#include "SH1106Wire.h"
-
+Torch torch(TORCH_PIN);
 MultiResetDetector* mrd;
-
-// For ESP8266
-#define LED_ON                          LOW
-#define LED_OFF                         HIGH
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(LED_BUILTIN, OUTPUT);
-    
-  Serial.begin(115200);
-  while (!Serial) {
-    delay(200);
-    Serial.print(F("\nStarting ESP_MultiResetDetector minimal on ")); Serial.print(ARDUINO_BOARD);
+  display.init();
+  display.clear();
+  display.drawXbm(0, 0, 128, 64, startup_logo); // assuming your bitmap is 128x64
+  display.display();
 
-  #if ESP_MRD_USE_LITTLEFS
-    Serial.println(F(" using LittleFS"));
-  #elif ESP_MRD_USE_SPIFFS
-    Serial.println(F(" using SPIFFS"));
-  #else
-    Serial.println(F(" using EEPROM"));
-  #endif
+  // Sets the current font. Available default fonts
+  // ArialMT_Plain_10, ArialMT_Plain_16, ArialMT_Plain_24
+  // Or create one with the font tool at http://oleddisplay.squix.ch
+  display.setFont(ArialMT_Plain_10);
 
-    Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
-    
-    mrd = new MultiResetDetector(MRD_TIMEOUT, MRD_ADDRESS);
-
-    if (mrd->detectMultiReset()) 
-    {
-      Serial.println("Multi Reset Detected");
-      digitalWrite(LED_BUILTIN, LED_ON);
-    } 
-    else 
-    {
-      Serial.println("No Multi Reset Detected");
-      digitalWrite(LED_BUILTIN, LED_OFF);
-    }
+  mrd = new MultiResetDetector(MRD_TIMEOUT, MRD_ADDRESS);
+  if (mrd->detectMultiReset()) 
+  {
+    display.println("Multi Reset Detected");
+    torch.on();
+  } 
+  else 
+  {
+    display.println("No Multi Reset Detected");
+    torch.off();
   }
 }
 
