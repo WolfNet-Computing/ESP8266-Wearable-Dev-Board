@@ -2,10 +2,8 @@
 
 #include <Wire.h>
 
-#if DISPLAY_SCREEN == sh1106
+#ifdef SH1106_I2C
   #include "SH1106Wire.h"
-
-  // By default SH1106Wire set I2C frequency to 700000, you can use set either another frequency or skip setting the frequency by providing -1 value
-  SH1106Wire display(0x3c, SDA, SCL);  // ADDRESS, SDA, SCL
+  SH1106Wire display = SH1106Wire(0x3C, 5, 4);
 #endif
 /* May need an 'else' clause here for other screen types... */

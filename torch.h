@@ -6,12 +6,6 @@
 
 using namespace std;
 
-// For ESP8266
-#ifdef ESP8266
-  #define TORCH_ON                        LOW
-  #define TORCH_OFF                       HIGH
-#endif
-
 class Torch {
   private:
     uint8_t _ledpin;
