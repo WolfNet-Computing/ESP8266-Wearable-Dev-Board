@@ -11,6 +11,8 @@
 #include "torch.h"
 #include "startup_logo.h"
 
+#define DEBUG                     true
+
 #ifdef ESP8266
   #define USE_LITTLEFS            false
   #define ESP_MRD_USE_LITTLEFS    true
@@ -95,6 +97,9 @@ String password = "your_password";
 
 Torch torch(TORCH_PIN);
 
+wl_status_t wifiStatus;
+wl_status_t wifiStatusPrev;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -113,8 +118,11 @@ void setup() {
   Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
 
   display.init();
+
   display.normalDisplay();
+#if FLIP_DISPLAY
   display.flipScreenVertically();
+#endif
   // Available default fonts: ArialMT_Plain_10, ArialMT_Plain_16,
   // ArialMT_Plain_24.
   // Or create one with the font tool at http://oleddisplay.squix.ch
@@ -122,15 +130,19 @@ void setup() {
   display.setColor(WHITE);
   display.displayOn();
   display.clear();
-  display.drawXbm(0, 0, 128, 64, startup_logo); // assuming your bitmap is 128x64
-  //display.drawString(0, 0, "ESP8266 Wearable");
-  //display.drawString(0, 20, "Dev Board ~Alpha~");
+  display.drawXbm(0, 0, 128, 64, startup_logo);
+  display.display();
+  delay(2000);
+
+  display.clear();
+  display.drawString(0, 0, "ESP8266 Wearable");
+  display.drawString(0, 20, "Dev Board ~Alpha~");
   display.display();
   delay(2000);
 
   if (WiFi.SSID() == "")
   {
-    #ifdef AUTHOR
+    #if AUTHOR
       #include "auth.h"
     #else
       Serial.println("No AP credentials");
@@ -184,7 +196,23 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  display.display();
+  wifiStatus = WiFi.status();
+  if ((wifiStatus != WL_CONNECTED) && (wifiStatus != wifiStatusPrev))
+  {
+    display.cls();
+    display.println("Failed to connect");
+    display.display();
+    wifiStatusPrev = wifiStatus;
+  }
+  else if (wifiStatus != wifiStatusPrev)
+  {
+    display.cls();
+    display.println("Local IP: ");
+    display.println(WiFi.localIP());
+    display.display();
+    wifiStatusPrev = wifiStatus;
+  }
+  delay(20);
   // Call the multi reset detector loop method every so often,
   // so that it can recognise when the timeout expires.
   // You can also call mrd.stop() when you wish to no longer

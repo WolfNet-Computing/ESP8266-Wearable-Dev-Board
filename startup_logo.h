@@ -2,6 +2,10 @@
 #define STARTUP_LOGO_H  1
 #pragma once
 
+#include <Arduino.h>
+
+using namespace std;
+
 /*
   WolfNet Computing Logo, 128x64px
   Used during the boot sequence, to be displayed to the user...
