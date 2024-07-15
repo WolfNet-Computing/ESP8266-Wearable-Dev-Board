@@ -1,6 +1,7 @@
 #include <Arduino.h>
-#include "config.h"
-#include "torch.h"
+
+#include "config.hpp"
+#include "torch.hpp"
 
 using namespace std;
 
