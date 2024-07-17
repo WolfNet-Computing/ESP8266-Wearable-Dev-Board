@@ -7,6 +7,8 @@
 
 #define DEBUG                     true
 
+Buttons buttons;
+
 // These defines must be put before #include <ESP_MultiResetDetector.h>
 // to select where to store MultiResetDetector's variable.
 // For ESP32, You must select one to be true. (EEPROM or SPIFFS)
@@ -179,7 +181,7 @@ void setup() {
       display.drawString(0, 0, "ESP8266 Wearable");
       display.drawString(0, 20, "Dev Board  ~ Alpha ~");
       display.display();
-      delay(2000);
+      delay(5000);
     }
     ESP.restart();
   }
@@ -206,7 +208,7 @@ void loop() {
     display.display();
     wifiStatusPrev = wifiStatus;
   }
-  delay(20);
+  delay(31);
   // Call the multi reset detector loop method every so often,
   // so that it can recognise when the timeout expires.
   // You can also call mrd.stop() when you wish to no longer

@@ -9,6 +9,7 @@
   #define LED_NEOPIXEL_GRB
   #define LED_PIN             1
   #define LED_NEOPIXEL_PIN    15
+
   #define LED_ON              LOW
   #define LED_OFF             HIGH
 
@@ -17,11 +18,13 @@
   #define SH1106_I2C
   #define FLIP_DISPLAY         true
 
-  #define BUTTON_UP           13
-  #define BUTTON_DOWN         12
-  #define BUTTON_A            14
-  #define BUTTON_B            0
-  #define BUTTON_C            2
+  typedef struct Buttons {
+    uint8_t up = 13;
+    uint8_t down = 12;
+    uint8_t a = 14;
+    uint8_t b = 0;
+    uint8_t c = 2;
+  };
 #endif
 
 #endif
