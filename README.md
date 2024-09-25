@@ -8,4 +8,4 @@
 > The files in the "not-my-work" directory are other people's intellectual property and therefore **SUBJECT TO THEIR OWN LICENCES**.  
   
 > [!NOTE]  
-> Please note that this software doesn't have Deauth capabilities.  
+> Please note that this software doesn't have 802.11 WiFi Deauth capabilities.  
