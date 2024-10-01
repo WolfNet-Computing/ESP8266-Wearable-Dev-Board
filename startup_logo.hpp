@@ -8,7 +8,7 @@ using namespace std;
 
 /*
   WolfNet Computing Logo, 128x64px
-  Used during the boot sequence, to be displayed to the user...
+  Used during the boot sequence when it is displayed to the user...
 */
 const unsigned char startup_logo[] PROGMEM = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3e, 0xfe, 0xcc, 0xff, 0x01, 0x0c, 0x00, 0x00, 0x00, 0x00, 
