@@ -5,6 +5,10 @@
 /* Comment out this variable if you have a standard board. */
 #define RIPOFF true
 
+/* These next couple of #DEFINEs set the default SSID and password for the configuration portal. */
+#define CONFIG_SSID "ESP8266_Dev-Board"
+#define CONFIG_PASS "Default_123"
+
 #if defined(DSTIKE_DEAUTHER_WATCH) && RIPOFF
   #define LED_NEOPIXEL_GRB
   #define LED_PIN             1
@@ -18,13 +22,11 @@
   #define SH1106_I2C
   #define FLIP_DISPLAY         true
 
-  typedef struct Buttons {
-    uint8_t up = 13;
-    uint8_t down = 12;
-    uint8_t a = 14;
-    uint8_t b = 0;
-    uint8_t c = 2;
-  };
+  #define BUTTON_UP 13
+  #define BUTTON_DOWN 12
+  #define BUTTON_A 14
+  #define BUTTON_B 0
+  #define BUTTON_C 2
 #endif
 
 #endif
