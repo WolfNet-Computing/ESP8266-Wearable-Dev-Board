@@ -8,12 +8,12 @@ using namespace std;
 
 class Torch {
   private:
-    uint8_t _ledpin;
-
+  bool  _torchState;
   public:
-    Torch(uint8_t pin);
+    void setup(void);
     void on(void);
     void off(void);
+    void toggle(void);
 };
 
 #endif
