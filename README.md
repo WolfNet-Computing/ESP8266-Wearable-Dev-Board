@@ -9,3 +9,4 @@
   
 > [!NOTE]  
 > Please note that this software doesn't have 802.11 WiFi Deauth capabilities.  
+> This is intended to be the case as this software is meant to __**replace**__ the deauth software that was originally intended to be used with it.  
