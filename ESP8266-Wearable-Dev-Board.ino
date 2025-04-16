@@ -23,7 +23,7 @@
 #define ESP_MRD_USE_SPIFFS false
 #define ESP_MRD_USE_EEPROM false
 #else
-#error This code is intended to run on the ESP8266 or ESP32 platform! Please check your Tools->Board setting.
+#error This code is intended to run on the ESP8266 or ESP32 platform! Please check your setting under Tools -> Board.
 #endif
 #include <ESP_WiFiManager.h>  //https://github.com/khoih-prog/ESP_WiFiManager
 #define MRD_TIMES 3
@@ -92,7 +92,8 @@ WM_Config WM_config;
 
 #define CONFIG_FILENAME F("/wifi_cred.dat")
 
-#include <ESP_WiFiManager.h>  //https://github.com/khoih-prog/ESP_WiFiManager
+#include <ESP_WiFiManager.h>  // https://github.com/khoih-prog/ESP_WiFiManager
+#include <PubSubClient.h>     // https://pubsubclient.knolleary.net/
 
 // SSID and PW for Config Portal
 String ssid = CONFIG_SSID;
