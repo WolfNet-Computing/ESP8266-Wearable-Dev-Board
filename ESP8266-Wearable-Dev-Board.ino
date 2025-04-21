@@ -4,8 +4,6 @@
 #include "DisplayUI.hpp"
 #include "Torch.hpp"
 
-#define AUTHOR true
-
 #define DEBUG true
 
 // These defines must be put before #include <ESP_MultiResetDetector.h>
