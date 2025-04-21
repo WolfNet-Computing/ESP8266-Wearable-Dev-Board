@@ -1,5 +1,5 @@
-#ifndef BUTTON_H
-#define BUTTON_H 1
+#ifndef BUTTON_HPP
+#define BUTTON_HPP 1
 #pragma once
 
 #include <Arduino.h>
@@ -11,7 +11,6 @@ using namespace std;
 class Button {
   public:
     Button();
-    bool isPressed(int);
 };
 
 #endif

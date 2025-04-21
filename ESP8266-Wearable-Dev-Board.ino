@@ -1,13 +1,10 @@
 // https://arduino-esp8266.readthedocs.io/en/latest/ for more on esp8266 programming using the Arduino IDE.
 
+#include "Config.hpp"
+#include "DisplayUI.hpp"
+#include "Torch.hpp"
 
-
-#include "config.hpp"
-#include "display.hpp"
-#include "startup_logo.hpp"
-#include "button.hpp"
-#include "torch.hpp"
-
+#define AUTHOR true
 
 #define DEBUG true
 
@@ -18,13 +15,14 @@
 // Otherwise, library will use default EEPROM storage.
 
 #ifdef ESP8266
-#define USE_LITTLEFS false
-#define ESP_MRD_USE_LITTLEFS true
-#define ESP_MRD_USE_SPIFFS false
-#define ESP_MRD_USE_EEPROM false
+  #define USE_LITTLEFS false
+  #define ESP_MRD_USE_LITTLEFS true
+  #define ESP_MRD_USE_SPIFFS false
+  #define ESP_MRD_USE_EEPROM false
 #else
-#error This code is intended to run on the ESP8266 or ESP32 platform! Please check your setting under Tools -> Board.
+  #error This code is intended to run on the ESP8266 or ESP32 platform! Please check your setting under Tools -> Board.
 #endif
+
 #include <ESP_WiFiManager.h>  //https://github.com/khoih-prog/ESP_WiFiManager
 #define MRD_TIMES 3
 #define MRD_TIMEOUT 1
@@ -59,14 +57,13 @@ FS* filesystem = &SPIFFS;
 
 #define ESP_getChipId() (ESP.getChipId())
 
-// You only need to format the filesystem once
-//#define FORMAT_FILESYSTEM       true
+// You only need to format the filesystem once, but if you need to, then set this value to true...
 #define FORMAT_FILESYSTEM false
 
 #define MIN_AP_PASSWORD_SIZE 8
 
 #define SSID_MAX_LEN 32
-//WPA2 passwords can be up to 63 characters long.
+// WPA2 passwords can be up to 63 characters long...
 #define PASS_MAX_LEN 64
 
 typedef struct
@@ -92,16 +89,17 @@ WM_Config WM_config;
 
 #define CONFIG_FILENAME F("/wifi_cred.dat")
 
-#include <ESP_WiFiManager.h>  // https://github.com/khoih-prog/ESP_WiFiManager
-#include <PubSubClient.h>     // https://pubsubclient.knolleary.net/
+#include <ESPAsync_WiFiManager.h> // https://github.com/khoih-prog/ESPAsync_WiFiManager
+#include <PubSubClient.h>         // https://pubsubclient.knolleary.net/
 
 // SSID and PW for Config Portal
 String ssid = CONFIG_SSID;
 String password = CONFIG_PASS;
 
-Torch torch;
+DisplayUI displayUI;
 
-Button button = Button();
+Torch torch;
+simplebutton::Button* resetButton;
 
 wl_status_t wifiStatus;
 wl_status_t wifiStatusPrev;
@@ -112,18 +110,16 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
   while (!Serial);
-  Serial.print("Starting ESP_MultiResetDetector minimal on ");
-  Serial.println(ARDUINO_BOARD);
-#if ESP_MRD_USE_LITTLEFS
-  Serial.println("using LittleFS");
-#elif ESP_MRD_USE_SPIFFS
-  Serial.println("using SPIFFS");
-#elif ESP_MRD_USE_RTC
-  Serial.println("using RTC");
-#else
-  Serial.println("using EEPROM");
-#endif
-  Serial.println(ESP_MULTI_RESET_DETECTOR_VERSION);
+
+  #if ESP_MRD_USE_LITTLEFS
+    Serial.println("using LittleFS");
+  #elif ESP_MRD_USE_SPIFFS
+    Serial.println("using SPIFFS");
+  #elif ESP_MRD_USE_RTC
+    Serial.println("using RTC");
+  #else
+    Serial.println("using EEPROM");
+  #endif
 
   mrd = new MultiResetDetector(MRD_TIMEOUT, MRD_ADDRESS);
   if (mrd->detectMultiReset()) {
@@ -133,6 +129,9 @@ void setup() {
     Serial.println("No Multi Reset Detected");
     altBoot = false;
   }
+
+  // Get time... (Will eventually be from a NTP server!)
+  currentTime = millis();
 
   if ((WiFi.SSID() == "") && !(altBoot)) {
 #if AUTHOR
@@ -159,25 +158,13 @@ void setup() {
     }
   }
 
-  display.init();
-  display.normalDisplay();
-#if FLIP_DISPLAY
-  display.flipScreenVertically();
-#endif
-  // Available default fonts: ArialMT_Plain_10, ArialMT_Plain_16,
-  // ArialMT_Plain_24.
-  // Or create one with the font tool at http://oleddisplay.squix.ch
-  display.setFont(ArialMT_Plain_10);
-  display.setColor(WHITE);
-  display.displayOn();
-
   if (altBoot)
   {
-    display.cls();
-    display.println("Update Mode...");
-    Serial.println("Update Mode...");
-    display.display();
-    Serial.println("Starting Config Portal");
+    // Start display
+    //if (settings::getDisplaySettings().enabled) {
+        displayUI.setup();
+        displayUI.mode = DISPLAY_MODE::ALTINTRO;
+    //}
     ESP_WiFiManager ESP_wifiManager("Dev-Board");
     ESP_wifiManager.setConfigPortalTimeout(0);
 
@@ -192,21 +179,29 @@ void setup() {
   }
   else
   {
-    display.cls();
-    display.drawXbm(0, 0, 128, 64, startup_logo);
-    display.display();
-    delay(3000);
-    display.cls();
-    display.drawString(0, 0, "ESP8266 Wearable");
-    display.drawString(0, 20, "Dev Board  ~ Alpha ~");
-    display.display();
-    delay(3000);
+    // Start display
+    //if (settings::getDisplaySettings().enabled) {
+        displayUI.setup();
+        displayUI.mode = DISPLAY_MODE::INTRO;
+    //}
   }
+
+  // (En/Dis)able serial command interface...
+  //if (settings::getCLISettings().enabled) {
+  //  cli.enable();
+  //} else {
+  //  prntln(SETUP_SERIAL_WARNING);
+  //  Serial.flush();
+  //  Serial.end();
+  //}
+  //cli.load();
 
 #if defined(TORCH_PIN)
   torch.setup();
 #endif
 
+  // Setup reset button...
+  resetButton = new ButtonPullup(RESET_BUTTON);
 }
 
 void loop() {
@@ -216,28 +211,18 @@ void loop() {
   wifiStatus = WiFi.status();
   if ((wifiStatus != WL_CONNECTED) && (wifiStatus != wifiStatusPrev))
   {
-    display.cls();
-    display.println("Failed to connect");
-    Serial.println("Failed to connect");
-    display.display();
+    displayUI.clear();
+    displayUI.drawString(0, "Failed to connect");
+    displayUI.refresh();
     wifiStatusPrev = wifiStatus;
   }
   else if (wifiStatus != wifiStatusPrev)
   {
-    display.cls();
-    display.println("Local IP:");
-    display.println(WiFi.localIP());
-    Serial.println("Local IP: ");
-    Serial.println(WiFi.localIP());
-    display.display();
+    displayUI.clear();
+    displayUI.drawString(0, "Local IP:");
+    displayUI.drawString(1, String(WiFi.localIP()));
+    displayUI.refresh();
     wifiStatusPrev = wifiStatus;
-  }
-
-  // Simple toggle for the torch using a button...
-  if (button.isPressed(BUTTON_C))
-  {
-    display.println("Well, we got here...");
-    //torch.toggle();
   }
 
   // Call the multi reset detector loop method every so often,
