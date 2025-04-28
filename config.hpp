@@ -2,6 +2,8 @@
 #define CONFIG_HPP	1
   #pragma once
 
+  using namespace std;
+
   #define ENABLE_DEBUG
   #define DEBUG_PORT Serial
   #define DEBUG_BAUD 115200
@@ -57,7 +59,7 @@
   #endif /* ifndef AP_HIDDEN */
 
   #ifndef AP_IP_ADDR
-    #define AP_IP_ADDR { 192, 168, 10, 1 }
+    #define AP_IP_ADDR { 192, 168, 4, 1 }
   #endif /* ifndef AP_IP_ADDR */
 
   // ===== WEB INTERFACE ===== //
@@ -117,14 +119,6 @@
   #ifndef LED_MODE_OFF
     #define LED_MODE_OFF 0, 0, 0
   #endif /* ifndef LED_MODE_OFF */
-
-  #ifndef LED_MODE_SCAN
-    #define LED_MODE_SCAN 0, 0, 255
-  #endif /* ifndef LED_MODE_SCAN */
-
-  #ifndef LED_MODE_ATTACK
-    #define LED_MODE_ATTACK 255, 0, 0
-  #endif /* ifndef LED_MODE_ATTACK */
 
   #ifndef LED_MODE_IDLE
     #define LED_MODE_IDLE 0, 255, 0
