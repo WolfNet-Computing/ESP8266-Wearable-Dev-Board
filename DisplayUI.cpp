@@ -4,7 +4,217 @@
 #include "DisplayUI.hpp"
 #include "StartupLogo.hpp"
 
-#include "not-my-work/functions/functions.h"
+void strToColor(String str, uint8_t* buf) {
+    str.replace(":", "");
+    str.replace("0x", "");
+    str.replace(",", "");
+    str.replace("#", "");
+    str.toUpperCase();
+
+    if (str.length() != 6) {
+        prntln(F_COLOR_INVALID);
+        return;
+    }
+
+    for (uint8_t i = 0; i < 3; i++) buf[i] = strtoul((str.substring(i * 2, i * 2 + 2)).c_str(), NULL, 16);
+}
+
+String center(String a, int len) {
+    int spaces = len - a.length();
+
+    for (int i = 0; i < spaces; i += 2) {
+        a = ' ' + a + ' ';
+    }
+
+    a = a.substring(0, len);
+
+    return a;
+}
+
+String left(String a, int len) {
+    int spaces = len - a.length();
+
+    while (spaces > 0) {
+        a = a + ' ';
+        spaces--;
+    }
+
+    a = a.substring(0, len);
+
+    return a;
+}
+
+String right(String a, int len) {
+    int spaces = len - a.length();
+
+    while (spaces > 0) {
+        a = ' ' + a;
+        spaces--;
+    }
+
+    a = a.substring(0, len);
+
+    return a;
+}
+
+String leftRight(String a, String b, int len) {
+    int spaces = len - a.length() - b.length();
+
+    while (spaces > 0) {
+        a = a + ' ';
+        spaces--;
+    }
+
+    a = a + b;
+
+    a = a.substring(0, len);
+
+    return a;
+}
+
+String escape(String str) {
+    str.replace(String(BACKSLASH), String(BACKSLASH) + String(BACKSLASH));
+    str.replace(String(DOUBLEQUOTES), String(BACKSLASH) + String(DOUBLEQUOTES));
+    return str;
+}
+
+bool ascii(char c) {
+    return c >= 0 && c <= 127;
+}
+
+bool printableAscii(char c) {
+    return c >= 32 && c <= 126;
+}
+
+bool getBit(uint8_t b, uint8_t n) {
+    return (b >> n) % 2 != 0;
+}
+
+uint8_t utf8(uint8_t c) {
+    if (!getBit(c, 7)) return 1;
+
+    if (getBit(c, 7) && getBit(c, 6) && !getBit(c, 5)) return 2;
+
+    if (getBit(c, 7) && getBit(c, 6) && getBit(c, 5) && !getBit(c, 4)) return 3;
+
+    if (getBit(c, 7) && getBit(c, 6) && getBit(c, 5) && getBit(c, 4) && !getBit(c, 3)) return 4;
+
+    return 0;
+}
+
+bool utf8Part(uint8_t c) {
+    return getBit(c, 7) && !getBit(c, 6);
+}
+
+String fixUtf8(String str) {
+    int size = str.length();
+
+    String  result = String();
+    char    c;
+    uint8_t len;
+    bool    ok;
+
+    for (int i = 0; i < size; i++) {
+        c   = str.charAt(i);       // get character
+        len = utf8(c);             // get utf8 char len
+
+        if (len <= 1) {
+            result += c;           // when 1 byte char, add it :)
+        }
+        else if (i + len > size) { // when char bigger than remaining string, end loop
+            i = size + 1;
+        }
+        else {
+            ok = true;
+
+            for (int j = 1; j < len && ok; j++) {
+                ok = utf8Part(str.charAt(i + j));   // if following char is compliant or not
+            }
+
+            if (ok) result += c;                    // everything is ok, add char and continue
+            else {                                  // utf8 char is broken
+                for (int j = 1; j < len; j++) {     // go through the next bytes
+                    c = str.charAt(i + j);
+
+                    if (utf8(c) == 1) result += c;  // when byte is ascii, add it :)
+                }
+                i += len - 1;                       // skip utf8 char because we already managed it
+            }
+        }
+    }
+    return result;
+}
+
+String removeUtf8(String str) {
+    str = fixUtf8(str); // fix it in case a utf char is broken
+    int size = str.length();
+
+    String  result = String();
+    char    c;
+    uint8_t len;
+
+    for (int i = 0; i < size; i++) {
+        c   = str.charAt(i);        // get character
+        len = utf8(c);              // get utf8 char len
+
+        if (len <= 1) result += c;  // when 1 byte char, add it :)
+        else i += len - 1;          // skip other chars
+    }
+
+    return result;
+}
+
+int utf8Len(String str) {
+    int size = str.length();
+
+    int  result = 0;
+    char c;
+    uint8_t len;
+
+    for (int i = 0; i < size; i++) {
+        c   = str.charAt(i);     // get character
+        len = utf8(c);           // get utf8 char len
+
+        if (len <= 1) result++;  // when 1 byte char, add 1 :)
+        else {
+            result++;
+
+            for (int j = 1; j < len; j++) {
+                c = str.charAt(i + j);
+
+                if (!utf8Part(c) && (utf8(c) == 1)) {
+                    Serial.println(c, HEX);
+                    result++; // if following char is compliant or not
+                }
+            }
+            i += len - 1;
+        }
+    }
+
+    return result;
+}
+
+String replaceUtf8(String str, String r) {
+    str = fixUtf8(str); // fix it in case a utf char is broken
+    int size = str.length();
+
+    String  result = String();
+    char    c;
+    uint8_t len;
+
+    for (int i = 0; i < size; i++) {
+        c   = str.charAt(i);        // get character
+        len = utf8(c);              // get utf8 char len
+
+        if (len <= 1) result += c;  // when 1 byte char, add it :)
+        else {
+            result += r;
+            i      += len - 1;      // skip other chars
+        }
+    }
+
+    return result;
+}
 
 void DisplayUI::configInit() {
   // initialize display
@@ -202,6 +412,10 @@ void DisplayUI::drawAltIntro() {
   updateSuffix();   // Display command...
   delay(3000);
 }
+
+DisplayUI::DisplayUI() {}
+
+DisplayUI::~DisplayUI() {}
 
 void DisplayUI::setup() {
   configInit();
