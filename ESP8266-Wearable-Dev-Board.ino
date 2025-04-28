@@ -1,10 +1,12 @@
 // https://arduino-esp8266.readthedocs.io/en/latest/ for more on esp8266 programming using the Arduino IDE.
 
+#include <Arduino.h>
+
+time_t currentTime;
+
 #include "Config.hpp"
 #include "DisplayUI.hpp"
 #include "Torch.hpp"
-
-#define DEBUG true
 
 // These defines must be put before #include <ESP_MultiResetDetector.h>
 // to select where to store MultiResetDetector's variable.
@@ -33,12 +35,12 @@ bool firstBoot = false;
 bool altBoot = false;
 
 #include <ESP8266WiFi.h>  //https://github.com/esp8266/Arduino
-//needed for library
-#include <DNSServer.h>
-#include <ESP8266WebServer.h>
-
 #include <ESP8266WiFiMulti.h>
 ESP8266WiFiMulti wifiMulti;
+#include <ESP8266WebServer.h>
+#include <WiFiUdp.h>
+#include <NTP.h>
+#include <DNSServer.h>
 
 #define USE_LITTLEFS true
 
@@ -58,28 +60,24 @@ FS* filesystem = &SPIFFS;
 // You only need to format the filesystem once, but if you need to, then set this value to true...
 #define FORMAT_FILESYSTEM false
 
-#define MIN_AP_PASSWORD_SIZE 8
-
 #define SSID_MAX_LEN 32
 // WPA2 passwords can be up to 63 characters long...
+#define MIN_AP_PASSWORD_SIZE 8
 #define PASS_MAX_LEN 64
 
-typedef struct
-{
+typedef struct {
   char wifi_ssid[SSID_MAX_LEN];
   char wifi_pw[PASS_MAX_LEN];
 } WiFi_Credentials;
 
-typedef struct
-{
+typedef struct {
   String wifi_ssid;
   String wifi_pw;
 } WiFi_Credentials_String;
 
 #define NUM_WIFI_CREDENTIALS 10
 
-typedef struct
-{
+typedef struct {
   WiFi_Credentials WiFi_Creds[NUM_WIFI_CREDENTIALS];
 } WM_Config;
 
@@ -87,12 +85,12 @@ WM_Config WM_config;
 
 #define CONFIG_FILENAME F("/wifi_cred.dat")
 
-#include <ESPAsync_WiFiManager.h> // https://github.com/khoih-prog/ESPAsync_WiFiManager
-#include <PubSubClient.h>         // https://pubsubclient.knolleary.net/
-
 // SSID and PW for Config Portal
 String ssid = CONFIG_SSID;
 String password = CONFIG_PASS;
+
+WiFiUDP wifiUdp;
+NTP ntp(wifiUdp);
 
 DisplayUI displayUI;
 
@@ -103,6 +101,15 @@ wl_status_t wifiStatus;
 wl_status_t wifiStatusPrev;
 
 bool booted = false;
+
+String ipToString(IPAddress ip) {
+  String strIP=
+    String(ip[0])+"."+
+    String(ip[1])+"."+
+    String(ip[2])+"."+
+    String(ip[3]);
+  return strIP;
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -128,12 +135,9 @@ void setup() {
     altBoot = false;
   }
 
-  // Get time... (Will eventually be from a NTP server!)
-  currentTime = millis();
-
   if ((WiFi.SSID() == "") && !(altBoot)) {
 #if AUTHOR
-#include "auth.hpp"
+    #include "auth.hpp"
 #else
     Serial.println("No AP credentials");
     firstBoot = true;
@@ -184,6 +188,12 @@ void setup() {
     //}
   }
 
+  // Get time... (Will eventually be from a NTP server!)
+  ntp.ruleDST("CEST", Last, Sun, Mar, 2, 120); // last sunday in march 2:00, timetone +120min (+1 GMT + 1h summertime offset)
+  ntp.ruleSTD("GMT", Last, Sun, Oct, 3, 60); // last sunday in october 3:00, timezone +60min (+1 GMT)
+  ntp.begin();
+  currentTime = ntp.epoch();
+
   // (En/Dis)able serial command interface...
   //if (settings::getCLISettings().enabled) {
   //  cli.enable();
@@ -216,10 +226,17 @@ void loop() {
   }
   else if (wifiStatus != wifiStatusPrev)
   {
+    ntp.update();
+    String dateAndTime = ntp.formattedTime("%A %T");
+    dateAndTime.concat(" ");
+    dateAndTime.concat(ntp.formattedTime("%d. %B %Y"));
     displayUI.clear();
     displayUI.drawString(0, "Local IP:");
-    displayUI.drawString(1, String(WiFi.localIP()));
+    displayUI.drawString(1, ipToString(WiFi.localIP()));
+    displayUI.drawString(2, "Date and time:");
+    displayUI.drawString(3, dateAndTime);
     displayUI.refresh();
+    currentTime = ntp.epoch();
     wifiStatusPrev = wifiStatus;
   }
 
