@@ -26,10 +26,10 @@
   #include "not-my-work/DS3231-1.0.3/DS3231.h"
   #endif
 
-  #include <SimpleButton.h>
+  //#include <SimpleButton.h>
   #include "not-my-work/SimpleList/SimpleList.h"
 
-  using namespace simplebutton;
+  //using namespace simplebutton;
 
   extern time_t currentTime;
 
@@ -61,10 +61,10 @@
       DISPLAY_MODE mode = DISPLAY_MODE::MENU;
       bool highlightLED = false;
 
-      Button* up   = NULL;
-      Button* down = NULL;
-      Button* a    = NULL;
-      Button* b    = NULL;
+      //Button* up   = NULL;
+      //Button* down = NULL;
+      //Button* a    = NULL;
+      //Button* b    = NULL;
 
 
   #if defined(SSD1306_I2C)
