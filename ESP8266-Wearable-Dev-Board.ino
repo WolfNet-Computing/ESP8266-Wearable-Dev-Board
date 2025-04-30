@@ -8,6 +8,8 @@ time_t currentTime;
 #include "DisplayUI.hpp"
 #include "Torch.hpp"
 
+#define RIPOFF  true
+
 // These defines must be put before #include <ESP_MultiResetDetector.h>
 // to select where to store MultiResetDetector's variable.
 // For ESP32, You must select one to be true. (EEPROM or SPIFFS)
@@ -95,7 +97,7 @@ NTP ntp(wifiUdp);
 DisplayUI displayUI;
 
 Torch torch;
-simplebutton::Button* resetButton;
+//simplebutton::Button* resetButton;
 
 wl_status_t wifiStatus;
 wl_status_t wifiStatusPrev;
@@ -104,9 +106,9 @@ bool booted = false;
 
 String ipToString(IPAddress ip) {
   String strIP=
-    String(ip[0])+"."+
-    String(ip[1])+"."+
-    String(ip[2])+"."+
+    String(ip[0]) + "." +
+    String(ip[1]) + "." +
+    String(ip[2]) + "." +
     String(ip[3]);
   return strIP;
 }
@@ -144,6 +146,12 @@ void setup() {
 #endif
   }
 
+  // Start display
+  //if (settings::getDisplaySettings().enabled) {
+    displayUI.setup();
+    displayUI.mode = DISPLAY_MODE::ALTINTRO;
+  //}
+
   if (firstBoot)
   {
     Serial.println("Starting Config Portal");
@@ -162,11 +170,6 @@ void setup() {
 
   if (altBoot)
   {
-    // Start display
-    //if (settings::getDisplaySettings().enabled) {
-        displayUI.setup();
-        displayUI.mode = DISPLAY_MODE::ALTINTRO;
-    //}
     ESP_WiFiManager ESP_wifiManager("Dev-Board");
     ESP_wifiManager.setConfigPortalTimeout(0);
 
@@ -178,14 +181,6 @@ void setup() {
     {
       Serial.println("connected");
     }
-  }
-  else
-  {
-    // Start display
-    //if (settings::getDisplaySettings().enabled) {
-        displayUI.setup();
-        displayUI.mode = DISPLAY_MODE::INTRO;
-    //}
   }
 
   // Get time... (Will eventually be from a NTP server!)
@@ -209,7 +204,7 @@ void setup() {
 #endif
 
   // Setup reset button...
-  resetButton = new ButtonPullup(RESET_BUTTON);
+  //resetButton = new ButtonPullup(RESET_BUTTON);
 }
 
 void loop() {
