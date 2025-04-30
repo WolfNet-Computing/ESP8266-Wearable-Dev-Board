@@ -284,6 +284,7 @@ void DisplayUI::drawBitmap(int pos_x, int pos_y, int size_x, int size_y, const u
   }
 #endif // ifdef HIGHLIGHT_LED
 
+/*
 void DisplayUI::setupButtons() {
   up   = new ButtonPullup(BUTTON_UP);
   down = new ButtonPullup(BUTTON_DOWN);
@@ -394,6 +395,7 @@ void DisplayUI::setupButtons() {
     digitalWrite(TORCH_PIN, highlightLED);
   });
 }
+*/
 
 void DisplayUI::drawIntro() {
   drawBitmap(0, 0, 128, 64, startup_logo);
@@ -419,7 +421,7 @@ DisplayUI::~DisplayUI() {}
 
 void DisplayUI::setup() {
   configInit();
-  setupButtons();
+  //setupButtons();
   buttonTime = currentTime;
 
   #ifdef RTC_DS3231
